@@ -24,15 +24,28 @@ def undersample_v2(table):
     labels = np.array([1 if label == -1 else 0 for label in labels ])
     return features, labels, feature_names
 
-def undersample(table):
+# def undersample(table):
+#     """
+#     Performs undersampling on data by keeping fake reviews and obtaining random sample
+#     of real reviews such that # of each class (real and fake) are equal
+#     """
+#     fake_reviews = table[table['label'] == -1]
+#     real_reviews = table[table['label'] == 1].sample(n=fake_reviews.shape[0], random_state=573)
+#     sample = pd.concat([fake_reviews, real_reviews], ignore_index=True)
+#     return sample
+
+def undersample(input_table):
     """
     Performs undersampling on data by keeping fake reviews and obtaining random sample
     of real reviews such that # of each class (real and fake) are equal
     """
-    fake_reviews = table[table['label'] == -1]
-    real_reviews = table[table['label'] == 1].sample(n=fake_reviews.shape[0], random_state=573)
-    sample = pd.concat([fake_reviews, real_reviews], ignore_index=True)
-    return sample
+    random_state=573
+    class_sizes = input_table.groupby('label').size()
+    min_class_size = class_sizes.min()
+    
+    undersampled_data = input_table.groupby('label').apply(lambda x: x.sample(n=min_class_size, random_state=random_state)).reset_index(drop=True)
+    return undersampled_data
+
 
 # def pre_process(table):
 #     labels = table["label"]
