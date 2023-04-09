@@ -385,49 +385,103 @@ def rating_features(table):
 
 
 
-def temporal(table):
+# def temporal(table):
+#     """
+#     Temporal features:
+#     Activity time: Number of days between first and last review of user.
+#     Maximum rating per day: Maximum rating provided by user in considered day.
+#     Date entropy: Number of days between current review and next review of user.
+#     Date variance: |date_of_review - avg_review_date_of_user|^2
+
+#     """
+#    ## activity time
+#     table['date'] = pd.to_datetime(table['date'])
+#     temp = table.loc[:, ['user_id', 'date', 'rating']]
+#     temp.sort_values(by=['date'], inplace=True)
+#     act_time_table = temp[['user_id', 'date']].groupby(['user_id']).agg(first=pd.NamedAgg(column='date', aggfunc='min'),
+#                                             last = pd.NamedAgg(column='date', aggfunc='max'))
+#     act_time_table['activity_time'] = ((act_time_table['last'] - act_time_table['first']) / np.timedelta64(1, 'D')).astype(int)
+    
+#     ## maxium rating per day
+#     temp2 = table
+#     temp2['date'] = pd.to_datetime(temp2['date'])
+#     temp2 = temp2[['user_id', 'date', 'rating']].groupby(['user_id', 'date']).agg(MRPD=pd.NamedAgg(column='rating', aggfunc='max'))
+
+#     ## date entropy
+#     temp['prev_date'] = temp.groupby('user_id')['date'].shift()
+#     temp['date_entropy'] = temp['date'] - temp['prev_date']
+#     temp.replace({pd.NaT: '0 day'}, inplace=True)
+#     temp['date_entropy'] = (temp['date_entropy'] / np.timedelta64(1, 'D')).astype(int)
+
+#     ## date var
+#     temp['original_index'] = temp.index
+#     temp3 = temp[['user_id', 'date']].groupby(['user_id']).agg(date_mean=pd.NamedAgg(column='date', aggfunc='mean'))
+#     temp = pd.merge(temp, temp3, on='user_id', how='left')
+#     temp['date_var'] = abs(((temp['date'] - temp['date_mean']) / np.timedelta64(1, 'D')))**2
+#     temp.set_index('original_index')
+
+#     ## join with original table
+#     table = table.loc[:, ['user_id', 'date']]
+#     table['date'] = pd.to_datetime(table['date'])
+#     table = pd.merge(table, act_time_table, on='user_id', how='left')
+#     table = pd.merge(table, temp2, on=['user_id', 'date'], how='left')
+#     table = pd.merge(table, temp, left_on=table.index, right_on='original_index')
+#     return table[['activity_time', 'MRPD', 'date_entropy', 'date_var']]
+
+
+import pandas as pd
+import numpy as np
+
+def temporal(data):
     """
     Temporal features:
     Activity time: Number of days between first and last review of user.
     Maximum rating per day: Maximum rating provided by user in considered day.
     Date entropy: Number of days between current review and next review of user.
     Date variance: |date_of_review - avg_review_date_of_user|^2
-
     """
-   ## activity time
-    table['date'] = pd.to_datetime(table['date'])
-    temp = table.loc[:, ['user_id', 'date', 'rating']]
-    temp.sort_values(by=['date'], inplace=True)
-    act_time_table = temp[['user_id', 'date']].groupby(['user_id']).agg(first=pd.NamedAgg(column='date', aggfunc='min'),
-                                            last = pd.NamedAgg(column='date', aggfunc='max'))
-    act_time_table['activity_time'] = ((act_time_table['last'] - act_time_table['first']) / np.timedelta64(1, 'D')).astype(int)
-    
-    ## maxium rating per day
-    temp2 = table
-    temp2['date'] = pd.to_datetime(temp2['date'])
-    temp2 = temp2[['user_id', 'date', 'rating']].groupby(['user_id', 'date']).agg(MRPD=pd.NamedAgg(column='rating', aggfunc='max'))
 
-    ## date entropy
-    temp['prev_date'] = temp.groupby('user_id')['date'].shift()
-    temp['date_entropy'] = temp['date'] - temp['prev_date']
-    temp.replace({pd.NaT: '0 day'}, inplace=True)
-    temp['date_entropy'] = (temp['date_entropy'] / np.timedelta64(1, 'D')).astype(int)
+    # Activity time
+    data['date'] = pd.to_datetime(data['date'])
+    temp_data = data.loc[:, ['user_id', 'date', 'rating']]
+    temp_data.sort_values(by=['date'], inplace=True)
+    activity_time_table = temp_data[['user_id', 'date']].groupby(['user_id']).agg(
+        first_date=pd.NamedAgg(column='date', aggfunc='min'),
+        last_date=pd.NamedAgg(column='date', aggfunc='max')
+    )
+    activity_time_table['activity_time'] = (
+        (activity_time_table['last_date'] - activity_time_table['first_date']) / np.timedelta64(1, 'D')).astype(int)
 
-    ## date var
-    temp['original_index'] = temp.index
-    temp3 = temp[['user_id', 'date']].groupby(['user_id']).agg(date_mean=pd.NamedAgg(column='date', aggfunc='mean'))
-    temp = pd.merge(temp, temp3, on='user_id', how='left')
-    temp['date_var'] = abs(((temp['date'] - temp['date_mean']) / np.timedelta64(1, 'D')))**2
-    temp.set_index('original_index')
+    # Maximum rating per day
+    temp_data2 = data
+    temp_data2['date'] = pd.to_datetime(temp_data2['date'])
+    temp_data2 = temp_data2[['user_id', 'date', 'rating']].groupby(['user_id', 'date']).agg(
+        max_rating=pd.NamedAgg(column='rating', aggfunc='max')
+    )
 
-    ## join with original table
-    table = table.loc[:, ['user_id', 'date']]
-    table['date'] = pd.to_datetime(table['date'])
-    table = pd.merge(table, act_time_table, on='user_id', how='left')
-    table = pd.merge(table, temp2, on=['user_id', 'date'], how='left')
-    table = pd.merge(table, temp, left_on=table.index, right_on='original_index')
-    return table[['activity_time', 'MRPD', 'date_entropy', 'date_var']]
+    # Date entropy
+    temp_data['previous_date'] = temp_data.groupby('user_id')['date'].shift()
+    temp_data['date_entropy'] = temp_data['date'] - temp_data['previous_date']
+    temp_data.replace({pd.NaT: '0 day'}, inplace=True)
+    temp_data['date_entropy'] = (temp_data['date_entropy'] / np.timedelta64(1, 'D')).astype(int)
 
+    # Date variance
+    temp_data['original_index'] = temp_data.index
+    temp_data3 = temp_data[['user_id', 'date']].groupby(['user_id']).agg(
+        avg_date=pd.NamedAgg(column='date', aggfunc='mean')
+    )
+    temp_data = pd.merge(temp_data, temp_data3, on='user_id', how='left')
+    temp_data['date_variance'] = abs(((temp_data['date'] - temp_data['avg_date']) / np.timedelta64(1, 'D'))) ** 2
+    temp_data.set_index('original_index')
+
+    # Merge with original data
+    data = data.loc[:, ['user_id', 'date']]
+    data['date'] = pd.to_datetime(data['date'])
+    data = pd.merge(data, activity_time_table, on='user_id', how='left')
+    data = pd.merge(data, temp_data2, on=['user_id', 'date'], how='left')
+    data = pd.merge(data, temp_data, left_on=data.index, right_on='original_index')
+
+    return data[['activity_time', 'max_rating', 'date_entropy', 'date_variance']]
    
 
     
