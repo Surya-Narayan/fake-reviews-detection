@@ -45,38 +45,21 @@ def pre_process(table):
     labels = np.array([1 if label == -1 else 0 for label in labels ])
     return features, labels, feature_names
 
-# return dataframe for DL
-def pre_process_df(table):
-    features = table.drop(['user_id', 'prod_id', "label", "date", "review"], axis=1)
-    for column in features.columns:
-        features[column] = features[column]  / features[column].abs().max()
-    return features
+# # return dataframe for DL
+# def pre_process_df(table):
+#     features = table.drop(['user_id', 'prod_id', "label", "date", "review"], axis=1)
+#     for column in features.columns:
+#         features[column] = features[column]  / features[column].abs().max()
+#     return features
 
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import Normalizer
-from imblearn.under_sampling import NearMiss
+def pre_process_df(input_table):
+    excluded_columns = ['user_id', 'prod_id', 'label', 'date', 'review']
+    feature_columns = [col for col in input_table.columns if col not in excluded_columns]
+    processed_features = input_table[feature_columns]
 
-def pre_process_undersample(table):
-    """
-    Performs data preprocessing and undersampling on input table.
-    """
-    # Perform undersampling
-    fake_reviews = table[table['label'] == -1]
-    real_reviews = table[table['label'] == 1].sample(n=fake_reviews.shape[0], random_state=573)
-    sample = pd.concat([fake_reviews, real_reviews], ignore_index=True)
+    processed_features = processed_features.apply(lambda x: x / x.abs().max(), axis=0)
     
-    # Preprocess features and labels
-    labels = sample["label"]
-    features = sample.drop(['user_id', 'prod_id', "label", "date", "review"], axis=1)
-    feature_names = list(features.columns)
-    scaler = Normalizer().fit(features)
-    normalized_features = scaler.transform(features)
-    undersample = NearMiss(version=3, n_neighbors_ver3=3)
-    features, labels = undersample.fit_resample(normalized_features, labels)
-    labels = np.array([1 if label == -1 else 0 for label in labels ])
-    
-    return features, labels, feature_names
+    return processed_features
 
 
 def evaluate(test_labels,y_pred, type):
@@ -103,19 +86,39 @@ def evaluate(test_labels,y_pred, type):
     print(confusion_matrix_df)
 
 
-def review_metadata(table):
+# def review_metadata(table):
+#     """
+#     Metadata features: 
+#     Rating: rating(1-5) given in review (no calculation needed)
+#     Singleton: 1 if review is only one written by user on date, 0 otherwise
+#     """
+#     # singleton
+#     date_counts = table.groupby(['user_id', 'date']).size().to_frame('size')
+#     table = pd.merge(table, date_counts, on=['user_id', 'date'], how='left')
+#     table['singleton'] = table['size'] == 1
+#     table['singleton'] = table['singleton'].astype('int')
+
+#     return table[['singleton']]
+
+
+def calculate_singleton(group):
+    """
+    helper function to be called by review_metadata to calculate singleton values
+    """
+    group_size = group.shape[0]
+    return pd.Series([1 if group_size == 1 else 0] * group_size, index=group.index)
+
+
+def review_metadata(input_table):
     """
     Metadata features: 
     Rating: rating(1-5) given in review (no calculation needed)
     Singleton: 1 if review is only one written by user on date, 0 otherwise
     """
-    # singleton
-    date_counts = table.groupby(['user_id', 'date']).size().to_frame('size')
-    table = pd.merge(table, date_counts, on=['user_id', 'date'], how='left')
-    table['singleton'] = table['size'] == 1
-    table['singleton'] = table['singleton'].astype('int')
+    input_table['singleton'] = input_table.groupby(['user_id', 'date']).apply(calculate_singleton).reset_index(drop=True)
+    
+    return input_table[['singleton']]
 
-    return table[['singleton']]
 
 
 def review_textual(table):
