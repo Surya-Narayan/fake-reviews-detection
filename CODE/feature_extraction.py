@@ -115,28 +115,60 @@ def pre_process_df(input_table):
     return processed_features
 
 
-def evaluate(test_labels,y_pred, type):
-    tn, fp, fn, tp = confusion_matrix(test_labels, y_pred).ravel()
-    acc = accuracy_score(test_labels, y_pred)
-    precision = precision_score(test_labels, y_pred)
-    recall = recall_score(test_labels, y_pred)
-    specificity = tn/(tn+fp)
-    metrics_val = [acc, precision, recall, specificity]
-    metrics = pd.DataFrame()
-    metrics["metric_type"] = ['Accuracy', 'Precision', 'Recall', 'Specificity']
-    metrics["value"] = metrics_val
-    metrics.to_csv(f"./EVALUATIONS/Metrics_{type}.csv", header=False, index=False)
-    # ConfusionMatrixDisplay.from_estimator()
+# def evaluate(test_labels,y_pred, type):
+#     tn, fp, fn, tp = confusion_matrix(test_labels, y_pred).ravel()
+#     acc = accuracy_score(test_labels, y_pred)
+#     precision = precision_score(test_labels, y_pred)
+#     recall = recall_score(test_labels, y_pred)
+#     specificity = tn/(tn+fp)
+#     metrics_val = [acc, precision, recall, specificity]
+#     metrics = pd.DataFrame()
+#     metrics["metric_type"] = ['Accuracy', 'Precision', 'Recall', 'Specificity']
+#     metrics["value"] = metrics_val
+#     metrics.to_csv(f"./EVALUATIONS/Metrics_{type}.csv", header=False, index=False)
+#     # ConfusionMatrixDisplay.from_estimator()
+
+#     # Create a DataFrame
+#     confusion_matrix_data = {'Predicted Positive': [tp, fn],
+#                             'Predicted Negative': [fp, tn]}
+#     confusion_matrix_index = ['Actual Positive', 'Actual Negative']
+
+#     confusion_matrix_df = pd.DataFrame(confusion_matrix_data, index=confusion_matrix_index)
+
+#     # Display the table
+#     print(confusion_matrix_df)
+
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+from tabulate import tabulate
+
+def evaluate(true_labels, predicted_labels, evaluation_type):
+    tn, fp, fn, tp = confusion_matrix(true_labels, predicted_labels).ravel()
+    specificity = tn / (tn + fp)
+
+    metric_names = ['Accuracy', 'Precision', 'Recall', 'Specificity']
+    metric_values = [accuracy_score(true_labels, predicted_labels),
+                     precision_score(true_labels, predicted_labels),
+                     recall_score(true_labels, predicted_labels),
+                     specificity]
+
+    metrics_df = pd.DataFrame(list(zip(metric_names, metric_values)), columns=["metric_type", "value"])
+    metrics_df.to_csv(f"./EVALUATIONS/Metrics_{evaluation_type}.csv", header=False, index=False)
 
     # Create a DataFrame
     confusion_matrix_data = {'Predicted Positive': [tp, fn],
-                            'Predicted Negative': [fp, tn]}
+                             'Predicted Negative': [fp, tn]}
     confusion_matrix_index = ['Actual Positive', 'Actual Negative']
 
     confusion_matrix_df = pd.DataFrame(confusion_matrix_data, index=confusion_matrix_index)
 
-    # Display the table
-    print(confusion_matrix_df)
+    # Pretty print the confusion matrix
+    print("\nConfusion Matrix:")
+    print(tabulate(confusion_matrix_df, headers='keys', tablefmt='psql'))
+
+    # Pretty print the metric values
+    print("\nMetric Values:")
+    print(tabulate(metrics_df, headers='keys', tablefmt='psql'))
+
 
 
 # def review_metadata(table):
