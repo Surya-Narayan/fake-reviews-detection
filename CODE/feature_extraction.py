@@ -34,16 +34,32 @@ def undersample(table):
     sample = pd.concat([fake_reviews, real_reviews], ignore_index=True)
     return sample
 
-def pre_process(table):
-    labels = table["label"]
-    features = table.drop(['user_id', 'prod_id', "label", "date", "review"], axis=1)
-    # normalize
-    for column in features.columns:
-        features[column] = features[column]  / features[column].abs().max()
-    feature_names = list(features.columns)
-    features = features.to_numpy()
-    labels = np.array([1 if label == -1 else 0 for label in labels ])
-    return features, labels, feature_names
+# def pre_process(table):
+#     labels = table["label"]
+#     features = table.drop(['user_id', 'prod_id', "label", "date", "review"], axis=1)
+#     # normalize
+#     for column in features.columns:
+#         features[column] = features[column]  / features[column].abs().max()
+#     feature_names = list(features.columns)
+#     features = features.to_numpy()
+#     labels = np.array([1 if label == -1 else 0 for label in labels ])
+#     return features, labels, feature_names
+
+def pre_process(input_table):
+    target_labels = input_table["label"]
+    excluded_columns = ['user_id', 'prod_id', 'label', 'date', 'review']
+    feature_columns = [col for col in input_table.columns if col not in excluded_columns]
+    processed_features = input_table[feature_columns]
+
+    # Normalize
+    processed_features = processed_features.apply(lambda x: x / x.abs().max(), axis=0)
+    
+    feature_names = processed_features.columns.tolist()
+    feature_matrix = processed_features.to_numpy()
+    label_array = np.array([1 if label == -1 else 0 for label in target_labels])
+
+    return feature_matrix, label_array, feature_names
+
 
 # # return dataframe for DL
 # def pre_process_df(table):
