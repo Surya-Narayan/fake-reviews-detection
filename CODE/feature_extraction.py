@@ -13,16 +13,40 @@ from imblearn.under_sampling import NearMiss
 from sklearn.preprocessing import Normalizer
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, ConfusionMatrixDisplay
 
-def undersample_v2(table):
-    labels = table["label"]
-    features = table.drop(['user_id', 'prod_id', "label", "date", "review"], axis=1)
-    feature_names = list(features.columns)
-    scaler = Normalizer().fit(features)
-    normalized_features = scaler.transform(features)
-    undersample = NearMiss(version=3, n_neighbors_ver3=3)
-    features, labels = undersample.fit_resample(normalized_features, labels)
-    labels = np.array([1 if label == -1 else 0 for label in labels ])
-    return features, labels, feature_names
+# def undersample_v2(table):
+#     labels = table["label"]
+#     features = table.drop(['user_id', 'prod_id', "label", "date", "review"], axis=1)
+#     feature_names = list(features.columns)
+#     scaler = Normalizer().fit(features)
+#     normalized_features = scaler.transform(features)
+#     undersample = NearMiss(version=3, n_neighbors_ver3=3)
+#     features, labels = undersample.fit_resample(normalized_features, labels)
+#     labels = np.array([1 if label == -1 else 0 for label in labels ])
+#     return features, labels, feature_names
+
+from sklearn.preprocessing import Normalizer
+from imblearn.under_sampling import NearMiss
+
+def undersample_v2(input_table):
+    target_labels = input_table["label"]
+    excluded_columns = ['user_id', 'prod_id', 'label', 'date', 'review']
+    feature_columns = [col for col in input_table.columns if col not in excluded_columns]
+    processed_features = input_table[feature_columns]
+
+    # Normalize
+    processed_features = processed_features.apply(lambda x: x / x.abs().max(), axis=0)
+
+    feature_names = processed_features.columns.tolist()
+    feature_matrix = processed_features.to_numpy()
+    
+    # Perform undersampling
+    undersampler = NearMiss(version=3, n_neighbors_ver3=3)
+    undersampled_features, undersampled_labels = undersampler.fit_resample(feature_matrix, target_labels)
+
+    label_array = np.array([1 if label == -1 else 0 for label in undersampled_labels])
+
+    return undersampled_features, label_array, feature_names
+
 
 # def undersample(table):
 #     """
