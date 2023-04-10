@@ -134,8 +134,6 @@ def plot_pred(dv_set, model, device, lim=35., preds=None, targets=None):
     plt.ylabel('predicted value')
     plt.title('Ground Truth v.s. Prediction')
     plt.show()
-    
-
 
 # Construct dataloader
 def prep_dataloader(mode, batch_size, data, labels,feature_ids, n_jobs=0):

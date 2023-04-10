@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from feature_extraction import *
 
 
-def svm_feature_selection(train_data, train_targets, test_data, test_targets, feature_names, model_type=""):
+def svm_feature_selection(train_data, train_targets, test_data, test_targets, feature_names, type=""):
     """
     Trains svm model with inputted features. Visualizes and returns top n coeff feature names
     """
@@ -22,7 +22,7 @@ def svm_feature_selection(train_data, train_targets, test_data, test_targets, fe
     clf = load(model_path)
 
     test_predictions = clf.predict(test_data)
-    evaluate(test_targets, test_predictions, model_type)
+    evaluate(test_targets, test_predictions, type)
     return feature_selection(clf, feature_names)
 
 def fit_linear_model(data, targets, model_path):
