@@ -5,12 +5,9 @@ import re
 import collections
 from statistics import mean
 from nltk.tokenize import sent_tokenize
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import pairwise_distances
 from scipy.stats import entropy
 from imblearn.under_sampling import NearMiss
-from sklearn.preprocessing import Normalizer
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
@@ -29,7 +26,6 @@ def plotwordcloud(table):
     plt.title("Authentic Reviews", fontsize=20)
     plt.show()
 
-from sklearn.preprocessing import Normalizer
 from imblearn.under_sampling import NearMiss
 
 def undersample_v2(input_table):

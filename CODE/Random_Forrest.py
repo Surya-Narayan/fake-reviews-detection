@@ -7,12 +7,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
 import pandas as pd
 import numpy as np
-from sklearn import metrics
 from scipy.stats import entropy
 import seaborn as sns
-import re
-import collections
-import string
 from sklearn.metrics import roc_curve, auc
 from imblearn.under_sampling import NearMiss
 from nltk.tokenize import sent_tokenize
@@ -20,7 +16,6 @@ from statistics import mean
 import matplotlib as mpl
 from feature_extraction import *
 from sklearn.decomposition import PCA
-import nltk
 from sklearn.metrics.pairwise import pairwise_distances
 import joblib
 import plotly.express as px

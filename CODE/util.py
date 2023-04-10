@@ -1,6 +1,4 @@
-
 import csv
-from math import sqrt, pow, exp
 
 def text_to_csv(input_file_name):
     with open(f"./YelpZip/{input_file_name}.txt", encoding='cp850') as source_file, \

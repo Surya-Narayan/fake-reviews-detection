@@ -1,12 +1,9 @@
-import sklearn
 import numpy as np
 import os.path
 from joblib import dump, load
 import matplotlib.pyplot as plt
 from sklearn import svm
-from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
-from sklearn import metrics
 from feature_extraction import *
 
 
