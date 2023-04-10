@@ -10,7 +10,6 @@ from sklearn import metrics
 from feature_extraction import *
 
 
-
 def svm_feature_selection(train_features, train_labels, test_features, test_labels, feature_names, type=""):
     """
     Trains svm model with inputted features. Visualizes and returns top n coeff feature names
