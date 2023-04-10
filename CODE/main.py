@@ -59,6 +59,9 @@ def main():
     # split data set into 80% training data and 20% test data
     train_features, test_features, train_labels, test_labels = train_test_split(features, labels, test_size=0.2,random_state=573)
     
+    #wordcloud
+    plotwordcloud(sample)
+
     # random forest and feature selection
     
     # will return accuracy score plot for different parameters
