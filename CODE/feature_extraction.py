@@ -12,17 +12,22 @@ from scipy.stats import entropy
 from imblearn.under_sampling import NearMiss
 from sklearn.preprocessing import Normalizer
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 
-# def undersample_v2(table):
-#     labels = table["label"]
-#     features = table.drop(['user_id', 'prod_id', "label", "date", "review"], axis=1)
-#     feature_names = list(features.columns)
-#     scaler = Normalizer().fit(features)
-#     normalized_features = scaler.transform(features)
-#     undersample = NearMiss(version=3, n_neighbors_ver3=3)
-#     features, labels = undersample.fit_resample(normalized_features, labels)
-#     labels = np.array([1 if label == -1 else 0 for label in labels ])
-#     return features, labels, feature_names
+def plotwordcloud(table):
+    wc = WordCloud(background_color='white',min_font_size=10,width=500,height=500)
+    reviews_wc = wc.generate(table[table['label']==-1]['review'].str.cat(sep=" "))
+   
+    plt.figure(figsize=(8,6))
+    plt.imshow(reviews_wc)
+    plt.title("Fake Reviews", fontsize=20)
+    plt.show()
+    reviews_wc = wc.generate(table[table['label']==1]['review'].str.cat(sep=" "))
+    plt.figure(figsize=(8,6))
+    plt.imshow(reviews_wc)
+    plt.title("Authentic Reviews", fontsize=20)
+    plt.show()
 
 from sklearn.preprocessing import Normalizer
 from imblearn.under_sampling import NearMiss
@@ -47,17 +52,6 @@ def undersample_v2(input_table):
 
     return undersampled_features, label_array, feature_names
 
-
-# def undersample(table):
-#     """
-#     Performs undersampling on data by keeping fake reviews and obtaining random sample
-#     of real reviews such that # of each class (real and fake) are equal
-#     """
-#     fake_reviews = table[table['label'] == -1]
-#     real_reviews = table[table['label'] == 1].sample(n=fake_reviews.shape[0], random_state=573)
-#     sample = pd.concat([fake_reviews, real_reviews], ignore_index=True)
-#     return sample
-
 def undersample(input_table):
     """
     Performs undersampling on data by keeping fake reviews and obtaining random sample
@@ -69,18 +63,6 @@ def undersample(input_table):
     
     undersampled_data = input_table.groupby('label').apply(lambda x: x.sample(n=min_class_size, random_state=random_state)).reset_index(drop=True)
     return undersampled_data
-
-
-# def pre_process(table):
-#     labels = table["label"]
-#     features = table.drop(['user_id', 'prod_id', "label", "date", "review"], axis=1)
-#     # normalize
-#     for column in features.columns:
-#         features[column] = features[column]  / features[column].abs().max()
-#     feature_names = list(features.columns)
-#     features = features.to_numpy()
-#     labels = np.array([1 if label == -1 else 0 for label in labels ])
-#     return features, labels, feature_names
 
 def pre_process(input_table):
     target_labels = input_table["label"]
@@ -97,14 +79,6 @@ def pre_process(input_table):
 
     return feature_matrix, label_array, feature_names
 
-
-# # return dataframe for DL
-# def pre_process_df(table):
-#     features = table.drop(['user_id', 'prod_id', "label", "date", "review"], axis=1)
-#     for column in features.columns:
-#         features[column] = features[column]  / features[column].abs().max()
-#     return features
-
 def pre_process_df(input_table):
     excluded_columns = ['user_id', 'prod_id', 'label', 'date', 'review']
     feature_columns = [col for col in input_table.columns if col not in excluded_columns]
@@ -113,30 +87,6 @@ def pre_process_df(input_table):
     processed_features = processed_features.apply(lambda x: x / x.abs().max(), axis=0)
     
     return processed_features
-
-
-# def evaluate(test_labels,y_pred, type):
-#     tn, fp, fn, tp = confusion_matrix(test_labels, y_pred).ravel()
-#     acc = accuracy_score(test_labels, y_pred)
-#     precision = precision_score(test_labels, y_pred)
-#     recall = recall_score(test_labels, y_pred)
-#     specificity = tn/(tn+fp)
-#     metrics_val = [acc, precision, recall, specificity]
-#     metrics = pd.DataFrame()
-#     metrics["metric_type"] = ['Accuracy', 'Precision', 'Recall', 'Specificity']
-#     metrics["value"] = metrics_val
-#     metrics.to_csv(f"./EVALUATIONS/Metrics_{type}.csv", header=False, index=False)
-#     # ConfusionMatrixDisplay.from_estimator()
-
-#     # Create a DataFrame
-#     confusion_matrix_data = {'Predicted Positive': [tp, fn],
-#                             'Predicted Negative': [fp, tn]}
-#     confusion_matrix_index = ['Actual Positive', 'Actual Negative']
-
-#     confusion_matrix_df = pd.DataFrame(confusion_matrix_data, index=confusion_matrix_index)
-
-#     # Display the table
-#     print(confusion_matrix_df)
 
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
 from tabulate import tabulate
@@ -169,23 +119,6 @@ def evaluate(true_labels, predicted_labels, evaluation_type):
     print("\nMetric Values:")
     print(tabulate(metrics_df, headers='keys', tablefmt='psql'))
 
-
-
-# def review_metadata(table):
-#     """
-#     Metadata features: 
-#     Rating: rating(1-5) given in review (no calculation needed)
-#     Singleton: 1 if review is only one written by user on date, 0 otherwise
-#     """
-#     # singleton
-#     date_counts = table.groupby(['user_id', 'date']).size().to_frame('size')
-#     table = pd.merge(table, date_counts, on=['user_id', 'date'], how='left')
-#     table['singleton'] = table['size'] == 1
-#     table['singleton'] = table['singleton'].astype('int')
-
-#     return table[['singleton']]
-
-
 def calculate_singleton(group):
     """
     helper function to be called by review_metadata to calculate singleton values
@@ -203,7 +136,6 @@ def review_metadata(input_table):
     input_table['singleton'] = input_table.groupby(['user_id', 'date']).apply(calculate_singleton).reset_index(drop=True)
     
     return input_table[['singleton']]
-
 
 
 def review_textual(table):
