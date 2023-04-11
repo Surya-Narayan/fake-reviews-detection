@@ -2,9 +2,8 @@ import pandas as pd
 import numpy as np
 import nltk
 from pathlib import Path 
-from svm_model import *
 from feature_extraction import *
-from Random_Forrest import *
+from rf_svm_models import *
 from FFDL_model import *
 
 def main():
