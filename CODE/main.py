@@ -37,7 +37,8 @@ def main():
             table = pd.concat([meta_data, reviewContent["review"]], axis=1).dropna()
 
             # consolidates all features into one table
-            table=pd.concat([table, review_metadata(table), review_textual(table), reviewer_burst(table), behavioral_features(table), rating_features(table), temporal(table)], axis=1)  
+            table=pd.concat([table, metadata_view(table), textual_data_review(table), table_burst_reviewer(table), extract_behavioral_features(table), feature_extraction_rating(table),
+                             extract_temporal_features(table)], axis=1)
 
             # writes dataframe containing all features to csv file
             os.makedirs(filepath, exist_ok=True)  
@@ -47,12 +48,12 @@ def main():
 
         os.makedirs(sampled_filepath, exist_ok=True)
         #undersample
-        undersampled_table = undersample(table)
+        undersampled_table = undersample_data(table)
         undersampled_table.to_csv(sampled_filepath, index=False)
 
     sample = pd.read_csv(sampled_filepath)
     features, labels, feature_names = pre_process(sample)
-    features_df = pre_process_df(sample)
+    features_df = preprocess_dataframe(sample)
     # remove
      
     # split data set into 80% training data and 20% test data

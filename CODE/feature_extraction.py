@@ -15,21 +15,21 @@ from tabulate import tabulate
 
 
 def plotwordcloud(table):
-    wc = WordCloud(background_color='white',min_font_size=10,width=500,height=500)
-    reviews_wc = wc.generate(table[table['label']==-1]['review'].str.cat(sep=" "))
-   
-    plt.figure(figsize=(8,6))
+    wc = WordCloud(background_color='white', min_font_size=10, width=500, height=500)
+    reviews_wc = wc.generate(table[table['label'] == -1]['review'].str.cat(sep=" "))
+
+    plt.figure(figsize=(8, 6))
     plt.imshow(reviews_wc)
     plt.title("Fake Reviews", fontsize=20)
     plt.show()
-    reviews_wc = wc.generate(table[table['label']==1]['review'].str.cat(sep=" "))
-    plt.figure(figsize=(8,6))
+    reviews_wc = wc.generate(table[table['label'] == 1]['review'].str.cat(sep=" "))
+    plt.figure(figsize=(8, 6))
     plt.imshow(reviews_wc)
     plt.title("Authentic Reviews", fontsize=20)
     plt.show()
 
 
-def undersample_v2(input_table):
+def version2_undersample(input_table):
     target_labels = input_table["label"]
     excluded_columns = ['user_id', 'prod_id', 'label', 'date', 'review']
     feature_columns = [col for col in input_table.columns if col not in excluded_columns]
@@ -40,7 +40,7 @@ def undersample_v2(input_table):
 
     feature_names = processed_features.columns.tolist()
     feature_matrix = processed_features.to_numpy()
-    
+
     # We erform undersampling
     undersampler = NearMiss(version=3, n_neighbors_ver3=3)
     undersampled_features, undersampled_labels = undersampler.fit_resample(feature_matrix, target_labels)
@@ -49,6 +49,7 @@ def undersample_v2(input_table):
 
     return undersampled_features, label_array, feature_names
 
+
 """
 We do undersampling on our data by keeping fake reviews. After doing this,
 we get random sample of the real reviews in a way that number of each class
@@ -56,13 +57,15 @@ we get random sample of the real reviews in a way that number of each class
 """
 
 
-def undersample(input_table):
-    random_state=573
+def undersample_data(input_table):
+    random_state = 573
     class_sizes = input_table.groupby('label').size()
     min_class_size = class_sizes.min()
-    
-    undersampled_data = input_table.groupby('label').apply(lambda x: x.sample(n=min_class_size, random_state=random_state)).reset_index(drop=True)
+
+    undersampled_data = input_table.groupby('label').apply(
+        lambda x: x.sample(n=min_class_size, random_state=random_state)).reset_index(drop=True)
     return undersampled_data
+
 
 def pre_process(input_table):
     target_labels = input_table["label"]
@@ -72,23 +75,25 @@ def pre_process(input_table):
 
     # We perfrom normalization
     processed_features = processed_features.apply(lambda x: x / x.abs().max(), axis=0)
-    
+
     feature_names = processed_features.columns.tolist()
     feature_matrix = processed_features.to_numpy()
     label_array = np.array([1 if label == -1 else 0 for label in target_labels])
 
     return feature_matrix, label_array, feature_names
 
-def pre_process_df(input_table):
+
+def preprocess_dataframe(input_table):
     excluded_columns = ['user_id', 'prod_id', 'label', 'date', 'review']
     feature_columns = [col for col in input_table.columns if col not in excluded_columns]
     processed_features = input_table[feature_columns]
 
     processed_features = processed_features.apply(lambda x: x / x.abs().max(), axis=0)
-    
+
     return processed_features
 
-def evaluate(true_labels, predicted_labels, evaluation_type):
+
+def generate_metrics(true_labels, predicted_labels, evaluation_type):
     tn, fp, fn, tp = confusion_matrix(true_labels, predicted_labels).ravel()
     specificity = tn / (tn + fp)
 
@@ -116,6 +121,7 @@ def evaluate(true_labels, predicted_labels, evaluation_type):
     print("\nMetric Values:")
     print(tabulate(metrics_df, headers='keys', tablefmt='psql'))
 
+
 """
 We created a helper function calculate_singleton() below to calculate singleton values.
 This function is called by review_metadata().
@@ -124,13 +130,17 @@ Singleton: It is 1 if review is only one written by the user on date. Otherwise,
 Rating: It is the rating (1-5) given in the review (calculation is not required).
 """
 
+
 def calculate_singleton(group):
     group_size = group.shape[0]
     return pd.Series([1 if group_size == 1 else 0] * group_size, index=group.index)
 
-def review_metadata(input_table):
-    input_table['singleton'] = input_table.groupby(['user_id', 'date']).apply(calculate_singleton).reset_index(drop=True)
+
+def metadata_view(input_table):
+    input_table['singleton'] = input_table.groupby(['user_id', 'date']).apply(calculate_singleton).reset_index(
+        drop=True)
     return input_table[['singleton']]
+
 
 """
 The text statistics are provided below:
@@ -141,11 +151,11 @@ Ratio of the first person pronouns: It considers only words which are first pers
 Ratio of exclamation sentences: It considers only sentences ending with '!'
 """
 
-def review_textual(table):
+
+def textual_data_review(table):
     statistics_table = {"RationOfCapL": [], "RatioOfCapW": [
     ], "RatioOfFirstPerson": [], "RatioOfExclamation": []}  # , "sentiment":[]
-    first_person_pronouns = set(
-        ["i", "mine", "my", "me", "we", "our", "us", "ourselves", "ours"])
+    first_person_pronouns = set(["i", "mine", "my", "me", "we", "our", "us", "ourselves", "ours"])
 
     for i, row in table.iterrows():
         sentences = sent_tokenize(row["review"])
@@ -173,10 +183,10 @@ def review_textual(table):
                         countCapL += 1
                         break
 
-        RatioOfExclamation = countExclamation/len(sentences)
-        RationOfCapL = countCapL/wordCountinAReview
-        RatioOfCapW = countCapW/wordCountinAReview
-        RatioOfFirstPerson = countFirstP/wordCountinAReview
+        RatioOfExclamation = countExclamation / len(sentences)
+        RationOfCapL = countCapL / wordCountinAReview
+        RatioOfCapW = countCapW / wordCountinAReview
+        RatioOfFirstPerson = countFirstP / wordCountinAReview
         statistics_table["RatioOfExclamation"].append(RatioOfExclamation)
         statistics_table["RationOfCapL"].append(RationOfCapL)
         statistics_table["RatioOfCapW"].append(RatioOfCapW)
@@ -185,6 +195,7 @@ def review_textual(table):
     text_statistics = pd.DataFrame.from_dict(statistics_table)
     return text_statistics
 
+
 """
 The burst features are given below:
 Density: It is the number of reviews for the entity on the given day.
@@ -192,7 +203,8 @@ Mean Rating Deviation: It is given by the formula |(average product rating on th
 Deviation From Local Mean: It is given by the formula |(product rating) - (average product rating on that date)|
 """
 
-def reviewer_burst(table):
+
+def table_burst_reviewer(table):
     # We group data by product and date
     grouped_data = table.groupby(['prod_id', 'date'])
 
@@ -223,8 +235,8 @@ Rating Deviation: It is the deviation of a review from the other reviews on same
 Reviewer Deviation: It is the average of the rating deviation across all the users' reviews.
 """
 
-def behavioral_features(table):
 
+def extract_behavioral_features(table):
     # We calculate MNR
     review_count = table.groupby(['user_id', 'date']).size().reset_index(name='count')
     mnr = review_count.groupby('user_id')['count'].max().reset_index(name='MNR')
@@ -234,7 +246,10 @@ def behavioral_features(table):
     total_reviews = table.groupby('user_id')['rating'].count().reset_index(name='total')
     positive_reviews = table[table['rating'] >= 4].groupby('user_id')['rating'].count().reset_index(name='pos')
     negative_reviews = table[table['rating'] <= 2].groupby('user_id')['rating'].count().reset_index(name='neg')
-    merged_totals = total_reviews.merge(positive_reviews, on='user_id', how='left').fillna(0).merge(negative_reviews, on='user_id', how='left').fillna(0)
+    merged_totals = total_reviews.merge(positive_reviews, on='user_id', how='left').fillna(0).merge(negative_reviews,
+                                                                                                    on='user_id',
+                                                                                                    how='left').fillna(
+        0)
     merged_totals['PPR'] = merged_totals['pos'] / merged_totals['total']
     merged_totals['PNR'] = merged_totals['neg'] / merged_totals['total']
     table = table.merge(merged_totals[['user_id', 'PPR', 'PNR']], on='user_id', validate='m:1')
@@ -253,14 +268,15 @@ def behavioral_features(table):
 
     return table[['MNR', 'PPR', 'PNR', 'RL', 'rating_dev', 'reviewer_dev']]
 
+
 """
 The rating features are given below:
 Average Deviation from the entity's average: The user's ratings assigned in his reviews evaluated are usually different from the average of an entitiy's rating.
 Rating Entropy: It is the entropy of the rating distribution of user's reviews.
 """
 
-def rating_features(table):
 
+def feature_extraction_rating(table):
     # We calculate the Average deviation from entity's average
     avg_prod_rating = table.groupby('prod_id')['rating'].mean().reset_index(name='prod_avg')
     table = table.merge(avg_prod_rating, on='prod_id', validate='m:1')
@@ -271,15 +287,17 @@ def rating_features(table):
     user_total_counts = user_rating_counts.groupby('user_id')['count'].sum().reset_index(name='total_count')
     user_rating_counts = user_rating_counts.merge(user_total_counts, on='user_id', validate='m:1')
     user_rating_counts['prob'] = user_rating_counts['count'] / user_rating_counts['total_count']
-    user_rating_entropy = user_rating_counts.groupby('user_id').apply(lambda x: entropy(x['prob'])).reset_index(name='rating_entropy')
+    user_rating_entropy = user_rating_counts.groupby('user_id').apply(lambda x: entropy(x['prob'])).reset_index(
+        name='rating_entropy')
     table = table.merge(user_rating_entropy, on='user_id', validate='m:1')
 
     # We calculate the Rating variance
     avg_user_rating = table.groupby('user_id')['rating'].mean().reset_index(name='user_avg')
     table = table.merge(avg_user_rating, on='user_id', validate='m:1')
-    table['rating_variance'] = (table['rating'] - table['user_avg'])**2
+    table['rating_variance'] = (table['rating'] - table['user_avg']) ** 2
 
     return table[['avg_dev_from_entity_avg', 'rating_entropy', 'rating_variance']]
+
 
 """
 The temporal features are given below:
@@ -289,8 +307,8 @@ Date Entropy: It is the number of days between the current review and the upcomi
 Date Variance: It is given by the formula |(date of review) - (average review date of the user)| ^ 2.
 """
 
-def temporal(data):
 
+def extract_temporal_features(data):
     # We calculate the Activity time
     data['date'] = pd.to_datetime(data['date'])
     temp_data = data.loc[:, ['user_id', 'date', 'rating']]
@@ -300,7 +318,7 @@ def temporal(data):
         last_date=pd.NamedAgg(column='date', aggfunc='max')
     )
     activity_time_table['activity_time'] = (
-        (activity_time_table['last_date'] - activity_time_table['first_date']) / np.timedelta64(1, 'D')).astype(int)
+            (activity_time_table['last_date'] - activity_time_table['first_date']) / np.timedelta64(1, 'D')).astype(int)
 
     # We find Maximum rating per day
     temp_data2 = data
@@ -332,10 +350,3 @@ def temporal(data):
     data = pd.merge(data, temp_data, left_on=data.index, right_on='original_index')
 
     return data[['activity_time', 'max_rating', 'date_entropy', 'date_variance']]
-   
-
-    
-
-   
-
-    

@@ -92,7 +92,7 @@ def train_rf(training_features, testing_features, training_labels, testing_label
             rf_classifier_model = joblib.load(classifier_file)
         
     predictions_from_classifier = rf_classifier_model.predict(testing_features)
-    evaluate(testing_labels, predictions_from_classifier, type)
+    generate_metrics(testing_labels, predictions_from_classifier, type)
 
     return feature_importance(rf_classifier_model, feature_name_list)
 
@@ -239,7 +239,7 @@ def svm_feature_selection(train_data, train_targets, test_data, test_targets, fe
     clf = load(model_path)
 
     test_predictions = clf.predict(test_data)
-    evaluate(test_targets, test_predictions, type)
+    generate_metrics(test_targets, test_predictions, type)
     return feature_selection(clf, feature_names)
 
 def fit_linear_model(data, targets, model_path):

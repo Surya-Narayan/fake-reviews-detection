@@ -287,7 +287,7 @@ def run_DL(data, label, feature_ids, top2_features, n_epoches = 2, batch_size = 
     plt.savefig(f'{os.getcwd()}/EVALUATIONS/visulaization_{type}.png')
     save_path = ""
     save_pred(preds, save_path + 'pred.csv')
-    evaluate(y_test, preds, type)
+    generate_metrics(y_test, preds, type)
     
 def save_pred(preds, file):
     ''' Save predictions to specified file '''
