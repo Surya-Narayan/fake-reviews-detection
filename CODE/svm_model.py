@@ -22,7 +22,7 @@ def feature_selection_plot(weights, sorted_indices, features, n):
     y_positions = np.arange(n)
     plt.barh(y_positions, weights[sorted_indices], color=bar_colors)
     features = np.array(features)
-    plt.yticks(y_positions, features[sorted_indices], rotation=0)
+    plt.yticks(y_positions, features[sorted_indices])
     plt.xlabel("Feature Importance")
     plt.tight_layout()
     plt.savefig(f'{os.getcwd()}/EVALUATIONS/SVM_feature_importance.png')
