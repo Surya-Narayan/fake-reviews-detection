@@ -1,24 +1,8 @@
 # Project: Fake Review Detection
 
-## Setting Up the Environment
-
-1. Create a new virtual environment: 
-```bash
-virtualenv -venv
-```
-
-2. Activate the newly created virtual environment:
-```bash
-./venv/Scripts/activate
-```
-
-3. While the virtual environment is active, install the necessary modules:
-```bash
-pip install -r requirements.txt
-```
 
 ## Preparing the Dataset
-1. Download the [YelpCSV folder](https://drive.google.com/drive/folders/1MexwmQTjEbz7UTQ2E_fPxLntE2ugeXtV?usp=share_link), [dataset_v1.csv](https://drive.google.com/file/d/1JzGEI0XdXk1l61vo3giNWUZykJzfRJKw/view?usp=share_link), and [review_feature_table.csv](https://drive.google.com/file/d/1QalYUu1pbkHglrF96GQw_0kL3thj8s17/view?usp=share_link) files, and place them into the DATA subdirectory. *Note: It's possible to run the program without downloading dataset_v1.csv and review_feature_table.csv beforehand. In this case, the program will re-calculate all features and carry out undersampling, which will result in a longer execution time.
+1. The dataset is too big to be uploaded at Github. Hence, we are uploading it in google drive and sharing the link here. Download the [YelpCSV folder](https://drive.google.com/drive/folders/1MexwmQTjEbz7UTQ2E_fPxLntE2ugeXtV?usp=share_link), [dataset_v1.csv](https://drive.google.com/file/d/1JzGEI0XdXk1l61vo3giNWUZykJzfRJKw/view?usp=share_link), and [review_feature_table.csv](https://drive.google.com/file/d/1QalYUu1pbkHglrF96GQw_0kL3thj8s17/view?usp=share_link) files, and place them into the DATA subdirectory. *Note: It's possible to run the program without downloading dataset_v1.csv and review_feature_table.csv beforehand. In this case, the program will re-calculate all features and carry out undersampling, which will result in a longer execution time.
 
 ```
 .
