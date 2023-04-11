@@ -241,30 +241,29 @@ def test(tt_set, model, device):
     preds = torch.cat(preds, dim=0).numpy()     # concatenate all predictions and convert to a numpy array
     return preds
     
-def run_DL(data, label, feature_ids, top2_features, n_epoches = 2, batch_size = 10, type=''):
-    device = get_device()                 # get the current available device ('cpu' or 'cuda')
+def run_DL(data, label, feature_ids, top2_features, n_epoches=2, batch_size=10, type=''):
+    device = get_device()  # get the current available device ('cpu' or 'cuda')
     rootdir = os.getcwd()
     os.makedirs(os.path.join(rootdir, 'CODE', 'models'), exist_ok=True)  # The trained model will be saved to ./models/
-    target_only = True                   # TODO: Using 40 states & 2 tested_positive features
+    target_only = True  # TODO: Using 40 states & 2 tested_positive features
 
     config = {
-        'n_epochs': n_epoches,                # maximum number of epochs
-        'batch_size': batch_size,               # mini-batch size for dataloader
-        'optimizer': 'Adam',              # optimization algorithm (optimizer in torch.optim)
-        'optim_hparas': {                # hyper-parameters for the optimizer (depends on which optimizer you are using)
-            # 'lr': 0.001,                 # learning rate 
-            # 'momentum': 0.9              # momentum 
+        'n_epochs': n_epoches,  # maximum number of epochs
+        'batch_size': batch_size,  # mini-batch size for dataloader
+        'optimizer': 'Adam',  # optimization algorithm (optimizer in torch.optim)
+        'optim_hparas': {  # hyper-parameters for the optimizer (depends on which optimizer you are using)
+            # 'lr': 0.001,                 # learning rate
+            # 'momentum': 0.9              # momentum
         },
-        'early_stop': 500,               # early stopping epochs (the number epochs since your model's last improvement)
+        'early_stop': 500,  # early stopping epochs (the number epochs since your model's last improvement)
         'save_path': os.path.join(rootdir, 'CODE', 'models', 'model.pth')  # your model will be saved here
     }
-
 
     X_train, X_test, y_train, y_test = train_test_split(data, label, test_size=0.3, random_state=42)
     tr_set = prep_dataloader('train', config['batch_size'], X_train, y_train, feature_ids)
     dv_set = prep_dataloader('dev', config['batch_size'], X_train, y_train, feature_ids)
     tt_set = prep_dataloader('test', config['batch_size'], X_test, y_test, feature_ids)
-    
+
     top1, top2 = top2_features
     feature_1, feature_2 = X_test[top1].to_numpy(), X_test[top2].to_numpy()
 
@@ -274,20 +273,25 @@ def run_DL(data, label, feature_ids, top2_features, n_epoches = 2, batch_size = 
     model.load_state_dict(torch.load(config['save_path']))
     plot_learning_curve(model_loss_record, title='deep model', type=type)
     preds = np.around(test(tt_set, model, device))
+
     # plot top 2 feature space
     cdict = {0: 'darkgreen', 1: 'red'}
+    plt.figure(figsize=(12, 8))  # Adjust the plot size
     fig, ax = plt.subplots()
     for g in np.unique(preds):
         ix = list(np.where(preds == g)[0])
-        ax.scatter(feature_1[ix],feature_2[ix], c = cdict[g], label = g, s = 100)
+        ax.scatter(feature_1[ix], feature_2[ix], c=cdict[g], label=g, s=100)
     ax.legend()
+
     plt.xlabel(top1)
     plt.ylabel(top2)
     plt.legend(loc="upper left")
+    plt.tight_layout()  # Adjust the layout to ensure labels are visible
     plt.savefig(f'{os.getcwd()}/EVALUATIONS/visulaization_{type}.png')
     save_path = ""
     save_pred(preds, save_path + 'pred.csv')
     generate_metrics(y_test, preds, type)
+
     
 def save_pred(preds, file):
     ''' Save predictions to specified file '''
@@ -297,15 +301,3 @@ def save_pred(preds, file):
         writer.writerow(['id', 'tested_positive'])
         for i, p in enumerate(preds):
             writer.writerow([i, p])
-
-# def evaluate(test_labels,y_pred):
-#     tn, fp, fn, tp = confusion_matrix(test_labels, y_pred).ravel()
-#     acc = accuracy_score(test_labels, y_pred)
-#     precision = precision_score(test_labels, y_pred)
-#     sensitivity = recall_score(test_labels, y_pred)
-#     specificity = tn/(tn+fp)
-#     metrics_val = [acc, precision, sensitivity, specificity]
-#     metrics = pd.DataFrame()
-#     metrics["metic_type"] = ['Accuracy', 'Precision', 'Sensitivity', 'Specificity']
-#     metrics["value"] = metrics_val
-#     metrics.to_csv("Metrics.csv", header=False, index=False)

@@ -124,7 +124,6 @@ def generate_metrics(true_labels, predicted_labels, evaluation_type):
     print(tabulate(metrics_df, headers='keys', tablefmt='psql'))
 
 
-
 """
 We created a helper function calculate_singleton() below to calculate singleton values.
 This function is called by review_metadata().

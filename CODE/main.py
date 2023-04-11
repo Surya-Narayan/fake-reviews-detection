@@ -86,7 +86,7 @@ def main():
     union_features = features_df[list(set(rf_top_features).union(set(svm_top_features)))]
     intersect_features = features_df[list(set(rf_top_features).intersection(set(svm_top_features)))]
     top2_rf = rf_top_features[:2]
-    # top2_svm = svm_top_features[:2]
+    top2_svm = svm_top_features[0] + svm_top_features[-1]
     print("trainin DL model with all features")
     run_DL(features_df, labels, feature_id, top2_rf , n_epoches = 100, batch_size = 256, type="DL_all")
 
@@ -94,11 +94,11 @@ def main():
     run_DL(rf_features, labels, feature_id, top2_rf , n_epoches = 100, batch_size = 256, type="DL_rf")
 
     print("trainin DL model with selected features by SVM features")
-    run_DL(svm_features, labels, feature_id, top2_svm , n_epoches = 100, batch_size = 256, type="DL_svm")
+    run_DL(svm_features, labels, feature_id, top2_rf , n_epoches = 100, batch_size = 256, type="DL_svm")
 
     print("trainin DL model with union of features")
     feature_id = range(len(union_features))
-    run_DL(union_features, labels, feature_id, top2_svm , n_epoches = 100, batch_size = 256, type="union")
+    run_DL(union_features, labels, feature_id, top2_rf , n_epoches = 100, batch_size = 256, type="union")
 
     print("trainin DL model with intersection of features")
     feature_id = range(len(intersect_features))
