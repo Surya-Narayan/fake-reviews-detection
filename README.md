@@ -1,25 +1,25 @@
-# Fake Review Detection Project
+# Project: Fake Review Detection
 
-## Set up environment
+## Setting Up the Environment
 
-1. Create virtual environment: 
+1. Create a new virtual environment: 
 ```bash
 virtualenv -venv
 ```
 
-2. Activate virtual environment:
+2. Activate the newly created virtual environment:
 ```bash
 ./venv/Scripts/activate
 ```
 
-3. While virtual environment is activated, install required modules
+3. While the virtual environment is active, install the necessary modules:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Load Dataset
-1. Download [YelpCSV folder](https://drive.google.com/drive/folders/1MexwmQTjEbz7UTQ2E_fPxLntE2ugeXtV?usp=share_link), [dataset_v1.csv](https://drive.google.com/file/d/1JzGEI0XdXk1l61vo3giNWUZykJzfRJKw/view?usp=share_link), and [review_feature_table.csv](https://drive.google.com/file/d/1QalYUu1pbkHglrF96GQw_0kL3thj8s17/view?usp=share_link) into DATA subdirectory.
-*Note: Program can be executed without downloading dataset_v1.csv and review_feature_table.csv beforehand. This will force program to re-compute all features and conduct undersampling, which will add to overall execution time.
+## Preparing the Dataset
+1. Download the [YelpCSV folder](https://drive.google.com/drive/folders/1MexwmQTjEbz7UTQ2E_fPxLntE2ugeXtV?usp=share_link), [dataset_v1.csv](https://drive.google.com/file/d/1JzGEI0XdXk1l61vo3giNWUZykJzfRJKw/view?usp=share_link), and [review_feature_table.csv](https://drive.google.com/file/d/1QalYUu1pbkHglrF96GQw_0kL3thj8s17/view?usp=share_link) files, and place them into the DATA subdirectory. *Note: It's possible to run the program without downloading dataset_v1.csv and review_feature_table.csv beforehand. In this case, the program will re-calculate all features and carry out undersampling, which will result in a longer execution time.
+
 ```
 .
 ├── DATA
@@ -34,11 +34,11 @@ pip install -r requirements.txt
 
 ```
 
-## Execute program
-1. Make sure your virtual environment is activated AND your current working directory is the general repo directory (ex. path/to/dir/fake_review_detection) and run command:
+## Executing the Program
+1. Make sure your virtual environment is active, and your current working directory is set to the main repository directory (e.g., path/to/dir/fake_review_detection). Then, execute the following command:
 ```bash
-python ./CODE/main.py
+python3 ./CODE/main.py
 ```
 
-## After Executing
-All necessary metrics and visualizations will populate in EVALUATIONS subdirectory.
+## After Running the Program
+Once the program has finished executing, all relevant metrics and visualizations will be generated and saved in the EVALUATIONS subdirectory.
