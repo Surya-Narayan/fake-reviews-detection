@@ -14,7 +14,7 @@ from imblearn.under_sampling import NearMiss
 from nltk.tokenize import sent_tokenize
 from statistics import mean
 import matplotlib as mpl
-from feature_extraction import *
+from FeatureEngineering import *
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import pairwise_distances
 import joblib
@@ -92,7 +92,7 @@ def train_rf(training_features, testing_features, training_labels, testing_label
             rf_classifier_model = joblib.load(classifier_file)
         
     predictions_from_classifier = rf_classifier_model.predict(testing_features)
-    generate_metrics(testing_labels, predictions_from_classifier, type)
+    calculatemetrics(testing_labels, predictions_from_classifier, type)
 
     return feature_importance(rf_classifier_model, feature_name_list)
 
@@ -117,7 +117,7 @@ def feature_importance(trained_model, feature_names):
     top_features = [importance_df['Feature_Name'][i] for i in range(10)]
     return top_features
 
-def pca_visualization(input_data, target_labels):
+def PCAVisualization(input_data, target_labels):
     """
     This function applies Principal Component Analysis (PCA) to reduce the input data to three dimensions and creates a 3D scatter plot of the transformed data.
     The plot is colored based on the target labels and saved as an image in the 'EVALUATIONS' directory.
@@ -135,7 +135,7 @@ def pca_visualization(input_data, target_labels):
     fig.write_image("./EVALUATIONS/RF_PCA_3D_Visualization.png")
     fig.show()
 
-def compare_rf(x_train_data, y_train_data, x_test_data, y_test_data):
+def randomForest(x_train_data, y_train_data, x_test_data, y_test_data):
     """
     This function trains a RandomForestClassifier model with different hyperparameter configurations and compares their performance.
     The hyperparameters used are the number of estimators and maximum tree depth, and the performance is evaluated using Area Under the Curve (AUC) scores.
@@ -186,7 +186,7 @@ import os.path
 from joblib import dump, load
 import matplotlib.pyplot as plt
 from sklearn import svm
-from feature_extraction import *
+from FeatureEngineering import *
 
 def feature_selection_plot(weights, sorted_indices, features, n):
     """
@@ -239,7 +239,7 @@ def svm_feature_selection(train_data, train_targets, test_data, test_targets, fe
     clf = load(model_path)
 
     test_predictions = clf.predict(test_data)
-    generate_metrics(test_targets, test_predictions, type)
+    calculatemetrics(test_targets, test_predictions, type)
     return feature_selection(clf, feature_names)
 
 def fit_linear_model(data, targets, model_path):
